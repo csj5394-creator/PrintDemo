@@ -1,5 +1,5 @@
 print("hello world")
-name="최성재"
+name="최성재로 수정"
 age=20
 score=95.5
 #1. 기본 출력
