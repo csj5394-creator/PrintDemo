@@ -1,73 +1,187 @@
-# 1. 기본 출력 
-print("Hello, Python!")  # 그냥 문자열 출력
+# 🖐️ MediaPipe Hands & Image Segmentation
+Google **MediaPipe**를 활용한 손 감지(Hand Detection) 및 이미지 분할(Image Segmentation) 실습 프로젝트입니다.  
+실시간 웹캠 또는 동영상 입력을 통해 **손의 움직임**과 **배경 흐리기 효과**를 테스트할 수 있습니다.
 
-# 2. 여러 값 출력 (콤마로 구분 - 자동 띄어쓰기)
-print("Name:", name, "Age:", age, "Score:", score)  # 여러 값을 콤마로 구분하여 출력
+![배너 이미지](assets/banner.png)
 
-# 3. f-string (Python 3.6+에서 사용 가능)
-print(f"My name is {name}, I am {age} years old, score: {score}")  # 변수 값을 f-string 안에 직접 삽입하여 출력
+---
 
-# 4. format() 함수 사용
-print("My name is {}, I am {} years old, score: {}".format(name, age, score))  # format()을 사용해 값을 대체하여 출력
-print("My name is {0}, age {1}, score {2}".format(name, age, score))  # format()에 인덱스를 사용한 출력
-print("Score with 2 decimals: {:.2f}".format(score))  # 소수점 2자리까지 출력
+## 목차
+- [소개](#소개)
+- [설치](#설치)
+- [손 감지 테스트](#손-감지-테스트)
+- [이미지 세그멘테이션 테스트](#이미지-세그멘테이션-테스트)
+- [추가 기능](#추가-기능)
+- [예시](#예시)
+- [기여](#기여)
+- [라이선스](#라이선스)
 
-# 5. % 포맷팅 (C 스타일 포맷, 구버전 방법)
-print("Name: %s, Age: %d, Score: %.1f" % (name, age, score))  # % 포맷팅을 사용하여 값 삽입
+---
 
-# 6. 여러 줄 출력 (줄바꿈 포함)
-print("This is line 1\nThis is line 2")  # \n을 사용해 줄바꿈 포함
+## 소개
+이 프로젝트는 **MediaPipe**의 기본 기능을 직접 실습하기 위해 제작되었습니다.  
+- 손가락 관절의 **랜드마크 추적**
+- 인물 영상의 **배경 흐림 효과 적용**
+- **OpenCV**를 통한 영상 입력 처리 및 실시간 렌더링
 
-# 7. end 옵션 (기본값은 줄바꿈 '\n')
-print("Hello", end=" ")  # 기본적으로 줄바꿈 대신 공백을 사용
-print("World!")  # 이어서 출력
+이 코드를 통해 MediaPipe의 구조와 영상 처리 파이프라인을 이해할 수 있습니다.
 
-# 8. sep 옵션 (기본값은 공백' ')
-print("2025", "89", "23", sep="-")  # sep 옵션을 사용하여 구분자를 변경
+---
 
-# 9. 딕셔너리/리스트 같이 출력
-data = {"name": name, "age": age, "score": score} 
-print("Data:", data)  # 딕셔너리 출력
+## 설치
 
-# 10. f-string 내 계산식/함수 사용
-print(f"Next year age: {age + 1}")  # f-string 내에서 계산식 사용
-print(f"Score (rounded): {round(score)}")  # f-string 내에서 함수 사용 (소수점 반올림)
+필요한 라이브러리를 설치합니다:
 
-# 11. 멀티라인 f-string (''' 혹은 "" 사용)
-print(f"""
-Student Info:
-- Name: {name}
-- Age: {age}
-- Score: {score:.2f}
-""")  # 멀티라인 문자열을 f-string과 결합하여 여러 줄을 출력
-# pip install rich 필요
-from rich import print as rprint 
-from rich.table import Table
-from rich.panel import Panel
 
-# 변수 정의
-name = "Alice"
-age = 25
-score = 95.5
-data = {"name": name, "age": age, "score": score}
 
-# 1) 컬러/스타일 출력: 글자에 색상과 굵기 스타일 적용
-rprint(f"[bold green]Hello, {name}![/] Your score is [cyan]{score:.2f}[/].")
 
-# 2) 패널(박스) 출력: 여러 줄 문자열을 꾸며서 박스 형태로 보여줌
-panel_text = f"""
-[bold]Student Info[/]
-Name : [yellow]{name}[/] Age: [magenta]{age}[/]
-- Score: [cyan]{score:.2f}[/]"""
-rprint(Panel(panel_text, title="Profile", border_style="blue"))
 
-# 3) 테이블 출력: 딕셔너리 데이터를 표 형식으로 예쁘게 출력
-table = Table(title="Records")
-table.add_column("Key", style="bold")   # 첫 번째 컬럼
-table.add_column("Value")               # 두 번째 컬럼
-for k, v in data.items():
-    table.add_row(k, str(v))            # 딕셔너리 항목 추가
-rprint(table)
 
-# 4) print처럼 sep, end 옵션도 사용 가능
-rprint("2025", "09", "23", sep="-", end=" 1\n")
+```bash
+pip install mediapipe opencv-python
+"""
+MediaPipe Hands 실습 예제
+========================
+이 코드는 Google MediaPipe를 이용해 손을 감지하고,
+손가락의 관절(랜드마크)을 시각화하는 예제입니다.
+
+👉 실행 방법:
+    1. pip install mediapipe opencv-python
+    2. python hand_detector.py
+    3. ESC 키로 종료
+"""
+
+import cv2
+import mediapipe as mp
+
+# ============================
+# 📷 카메라 혹은 동영상 연결
+# ============================
+# 카메라가 연결되어 있다면:
+# cap = cv2.VideoCapture(0)
+
+# 카메라가 없다면 준비된 hand.mp4 파일로 테스트:
+cap = cv2.VideoCapture("hand.mp4")
+
+# ============================
+# 🖐️ MediaPipe Hands 초기화
+# ============================
+mp_hands = mp.solutions.hands
+mp_drawing = mp.solutions.drawing_utils
+
+# Hands 객체 생성 (정확도, 감지 모드 조정 가능)
+hands = mp_hands.Hands(
+    static_image_mode=False,
+    max_num_hands=2,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
+
+# ============================
+# 🎥 영상 프레임 반복 처리
+# ============================
+while True:
+    success, frame = cap.read()
+    if not success:
+        print("❌ 영상 입력을 불러올 수 없습니다.")
+        break
+
+    # 좌우 반전 (셀카 형태로 보기)
+    frame = cv2.flip(frame, 1)
+
+    # BGR → RGB 변환 (MediaPipe는 RGB 입력 필요)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # 손 감지 수행
+    result = hands.process(rgb_frame)
+
+    # 감지된 손 랜드마크가 있다면 시각화
+    if result.multi_hand_landmarks:
+        for hand_landmarks in result.multi_hand_landmarks:
+            mp_drawing.draw_landmarks(
+                frame, 
+                hand_landmarks, 
+                mp_hands.HAND_CONNECTIONS
+            )
+
+    # 결과 표시
+    cv2.imshow("🖐️ MediaPipe Hand Detector", frame)
+
+    # ESC 키로 종료
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+
+# ============================
+# 🔚 종료 및 자원 해제
+# ============================
+cap.release()
+cv2.destroyAllWindows()
+
+"""
+MediaPipe Selfie Segmentation 실습 예제
+======================================
+이 코드는 사람의 배경을 인식하고 흐리게(Blur) 처리하는 예제입니다.
+
+👉 실행 방법:
+    1. pip install mediapipe opencv-python
+    2. python selfie_segmentation.py
+    3. ESC 키로 종료
+"""
+
+import cv2
+import mediapipe as mp
+
+# ============================
+# 📷 카메라 연결
+# ============================
+cap = cv2.VideoCapture(0)  # 또는 영상 파일 경로 입력 가능
+
+# ============================
+# 🧍 MediaPipe Segmentation 초기화
+# ============================
+mp_selfie_segmentation = mp.solutions.selfie_segmentation
+segment = mp_selfie_segmentation.SelfieSegmentation(model_selection=1)
+
+# ============================
+# 🎥 영상 프레임 반복 처리
+# ============================
+while True:
+    success, frame = cap.read()
+    if not success:
+        print("❌ 영상 입력 불가")
+        break
+
+    # 좌우 반전 (셀카 보기)
+    frame = cv2.flip(frame, 1)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # 배경 분리 수행
+    result = segment.process(rgb_frame)
+    mask = result.segmentation_mask
+
+    # ============================
+    # 🌫️ 배경 흐림 (Blur)
+    # ============================
+    # 배경 부분만 블러 처리
+    blurred = cv2.GaussianBlur(frame, (55, 55), 0)  # ← 여기서 강도 조절 가능
+    condition = mask > 0.5  # True=사람, False=배경
+
+    # 배경과 전경 합성
+    output = frame.copy()
+    output[~condition] = blurred[~condition]
+
+    # ============================
+    # 💡 결과 표시
+    # ============================
+    cv2.imshow("🎨 Selfie Segmentation (ESC to quit)", output)
+
+    # ESC 키로 종료
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+
+# ============================
+# 🔚 종료 및 자원 해제
+# ============================
+cap.release()
+cv2.destroyAllWindows()
+
